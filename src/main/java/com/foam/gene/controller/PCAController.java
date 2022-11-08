@@ -34,9 +34,10 @@ public class PCAController {
         // 保存用户上传的文件
         file.transferTo(new File("/Users/lizhikun/Desktop/test", newFileName));
         System.out.println("已保存在/Users/lizhikun/Desktop/test路径下");
+
+        //设置执行命令
+
         return "Download";
     }
-
-
 
 }
