@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 
 @Controller
 @RequestMapping("/Tools")
@@ -16,7 +16,8 @@ public class PCAController {
                            MultipartFile file,
                            @RequestParam("PCA_number") String PCA_number,
                            @RequestParam("Email") String Email ,
-                           @RequestParam("Theme") String Theme) throws IOException {
+                           @RequestParam("Theme") String Theme ,
+                           HttpServletResponse response) throws IOException, InterruptedException {
         System.out.println(file_type);
 
         // 文件名
@@ -29,14 +30,43 @@ public class PCAController {
 
         // 改文件名
         String ext = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String newFileName = "test";
+        String newFileName = Theme+ext;
+        String FilePrefix = Theme;
 
         // 保存用户上传的文件
-        file.transferTo(new File("/Users/lizhikun/Desktop/test", newFileName));
-        System.out.println("已保存在/Users/lizhikun/Desktop/test路径下");
+        // file.transferTo(new File("/Users/lizhikun/Desktop/test", newFileName));
+        //file.transferTo(new File("/Users/zzzlin/Desktop/test", newFileName));
 
-        //设置执行命令
+        file.transferTo(new File("/home/foam/gene/pca_model/users/"+Email+"/start",newFileName));
+        Process process = Runtime.getRuntime().exec("sh /home/foam/gene/pca_model/script_run/AMO2P-PCA.sh "+Email+" "+FilePrefix+" "+PCA_number);
 
+        Thread.sleep(1000*1);
+        // 开启一个文件对象
+        File gz = new File("/home/foam/gene/pca_model/users/"+Email+"/output/"+Theme+".gz");
+
+        // 判断文件是否存在
+        if (gz.exists() ) {
+            response.reset();
+            response.setContentType("application/octet-stream");
+            response.setCharacterEncoding("utf-8");
+            response.setContentLength((int) gz.length());
+            response.setHeader("Content-Disposition", "attachment;filename="+Theme+".gz");
+
+            try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(gz));) {
+                byte[] buff = new byte[1024];
+                OutputStream os  = response.getOutputStream();
+                int i = 0;
+                while ((i = bis.read(buff)) != -1) {
+                    os.write(buff, 0, i);
+                    os.flush();
+                }
+            } catch (IOException e) {
+                return "下载失败";
+            }
+        } else {
+            System.out.println("文件不存在");
+            return "出错了";
+        }
         return "Download";
     }
 
