@@ -1,0 +1,18 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 500MB
+  mvc:
+    favicon:
+      enabled: false
+
+  thymeleaf:
+#    prefix: classpath:/templates/
+#    suffix: .html
+    cache: false #????
+  datasource:
+    url: jdbc:mysql://localhost:3306/read_data?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: lizhikun
+    driver-class-name: com.mysql.cj.jdbc.Driver
